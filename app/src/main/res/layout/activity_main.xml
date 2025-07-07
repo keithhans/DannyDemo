@@ -26,47 +26,132 @@
             android:text="播放" />
     </LinearLayout>
     
-    <Button
-        android:id="@+id/btn_up"
+    <!-- 左侧移动控制区域 -->
+    <RelativeLayout
+        android:id="@+id/movement_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/audio_controls"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:text="上" />
-
-    <Button
-        android:id="@+id/btn_down"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="50dp"
-        android:text="下" />
-
-    <Button
-        android:id="@+id/btn_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
         android:layout_marginLeft="50dp"
-        android:text="左" />
+        android:layout_marginTop="50dp">
+        
+        <TextView
+            android:id="@+id/movement_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="移动控制"
+            android:textStyle="bold" />
+            
+        <Button
+            android:id="@+id/btn_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/movement_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="上" />
 
-    <Button
-        android:id="@+id/btn_right"
+        <Button
+            android:id="@+id/btn_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_up"
+            android:layout_toLeftOf="@id/btn_stop"
+            android:layout_marginTop="10dp"
+            android:text="左" />
+
+        <Button
+            android:id="@+id/btn_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_up"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="停" />
+
+        <Button
+            android:id="@+id/btn_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_up"
+            android:layout_toRightOf="@id/btn_stop"
+            android:layout_marginTop="10dp"
+            android:text="右" />
+
+        <Button
+            android:id="@+id/btn_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_stop"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="下" />
+    </RelativeLayout>
+    
+    <!-- 右侧脖子控制区域 -->
+    <RelativeLayout
+        android:id="@+id/neck_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/audio_controls"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
         android:layout_marginRight="50dp"
-        android:text="右" />
+        android:layout_marginTop="50dp">
+        
+        <TextView
+            android:id="@+id/neck_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="脖子控制"
+            android:textStyle="bold" />
+            
+        <Button
+            android:id="@+id/btn_neck_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/neck_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="上" />
 
-    <Button
-        android:id="@+id/btn_stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="停" />
+        <Button
+            android:id="@+id/btn_neck_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_neck_up"
+            android:layout_toLeftOf="@id/btn_neck_stop"
+            android:layout_marginTop="10dp"
+            android:text="左" />
+
+        <Button
+            android:id="@+id/btn_neck_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_neck_up"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="停" />
+
+        <Button
+            android:id="@+id/btn_neck_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_neck_up"
+            android:layout_toRightOf="@id/btn_neck_stop"
+            android:layout_marginTop="10dp"
+            android:text="右" />
+
+        <Button
+            android:id="@+id/btn_neck_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_neck_stop"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="下" />
+    </RelativeLayout>
 
 </RelativeLayout>

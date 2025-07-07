@@ -91,6 +91,10 @@ class MainActivity : Activity(), View.OnClickListener {
     private lateinit var mToast: Toast
     private var mBuildGrammar: Boolean = false
     private var bEnableLEDControllByApp: Boolean = false
+    
+    // 脖子角度控制变量
+    private var neckVerticalAngle: Float = 0f // 脖子上下角度，范围-20到20
+    private var neckHorizontalAngle: Float = 0f // 脖子左右角度，范围-20到20
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,17 +110,28 @@ class MainActivity : Activity(), View.OnClickListener {
         // register Nuwa Robot Listener
         registerNuwaRobotListener()
         
+        // 初始化脖子角度变量
+        neckVerticalAngle = 0f
+        neckHorizontalAngle = 0f
+        
         // 检查并请求权限
         if (!checkPermissions()) {
             requestPermissions()
         }
         
-        // 设置方向按钮的点击监听器
+        // 设置移动方向按钮的点击监听器
         findViewById<Button>(R.id.btn_up).setOnClickListener { up() }
         findViewById<Button>(R.id.btn_down).setOnClickListener { down() }
         findViewById<Button>(R.id.btn_left).setOnClickListener { left() }
         findViewById<Button>(R.id.btn_right).setOnClickListener { right() }
         findViewById<Button>(R.id.btn_stop).setOnClickListener { stop() }
+        
+        // 设置脖子控制按钮的点击监听器
+        findViewById<Button>(R.id.btn_neck_up).setOnClickListener { neckUp() }
+        findViewById<Button>(R.id.btn_neck_down).setOnClickListener { neckDown() }
+        findViewById<Button>(R.id.btn_neck_left).setOnClickListener { neckLeft() }
+        findViewById<Button>(R.id.btn_neck_right).setOnClickListener { neckRight() }
+        findViewById<Button>(R.id.btn_neck_stop).setOnClickListener { neckStop() }
         
         // 初始化录音和播放按钮
         btnRecord = findViewById(R.id.btn_record)
@@ -150,6 +165,15 @@ class MainActivity : Activity(), View.OnClickListener {
         // 释放录音和播放资源
         releaseMediaRecorder()
         releaseMediaPlayer()
+        
+        // 重置脖子位置
+        try {
+            mRobot.ctlMotor(2, 0, 0f, 40f) // 重置上下运动
+            mRobot.ctlMotor(3, 0, 0f, 40f) // 重置左右运动
+        } catch (e: Exception) {
+            Log.e(TAG, "重置脖子位置失败: ${e.message}")
+        }
+        
         // release Nuwa Robot SDK resource
         mRobot.release()
     }
@@ -670,6 +694,57 @@ class MainActivity : Activity(), View.OnClickListener {
         mRobot.stopInAccelerationEx()
         mRobot.move(0f)
         mRobot.turn(0f)
-
+    }
+    
+    // 脖子控制函数
+    private fun neckUp() {
+        Log.d(TAG, "Neck Direction: Up")
+        // 增加脖子上下角度，每次增加2度，最大20度
+        neckVerticalAngle = (neckVerticalAngle - 2f).coerceAtMost(20f)
+        showToast("脖子向上: $neckVerticalAngle 度")
+        // 使用SDK中的电机控制方法控制脖子向上
+        // 假设电机2控制脖子上下运动，正值表示向上
+        mRobot.ctlMotor(1, 0, neckVerticalAngle, 30f)
+    }
+    
+    private fun neckDown() {
+        Log.d(TAG, "Neck Direction: Down")
+        // 减少脖子上下角度，每次减少2度，最小-20度
+        neckVerticalAngle = (neckVerticalAngle + 2f).coerceAtLeast(-20f)
+        showToast("脖子向下: $neckVerticalAngle 度")
+        // 使用SDK中的电机控制方法控制脖子向下
+        // 假设电机2控制脖子上下运动，负值表示向下
+        mRobot.ctlMotor(1, 0, neckVerticalAngle, 30f)
+    }
+    
+    private fun neckLeft() {
+        Log.d(TAG, "Neck Direction: Left")
+        // 增加脖子左右角度，每次增加2度，最大20度
+        neckHorizontalAngle = (neckHorizontalAngle + 2f).coerceAtMost(40f)
+        showToast("脖子向左: $neckHorizontalAngle 度")
+        // 使用SDK中的电机控制方法控制脖子向左
+        // 假设电机3控制脖子左右运动，正值表示向左
+        mRobot.ctlMotor(2, 0, neckHorizontalAngle, 30f)
+    }
+    
+    private fun neckRight() {
+        Log.d(TAG, "Neck Direction: Right")
+        // 减少脖子左右角度，每次减少2度，最小-20度
+        neckHorizontalAngle = (neckHorizontalAngle - 2f).coerceAtLeast(-40f)
+        showToast("脖子向右: $neckHorizontalAngle 度")
+        // 使用SDK中的电机控制方法控制脖子向右
+        // 假设电机3控制脖子左右运动，负值表示向右
+        mRobot.ctlMotor(2, 0, neckHorizontalAngle, 30f)
+    }
+    
+    private fun neckStop() {
+        Log.d(TAG, "Neck Direction: Stop")
+        // 重置脖子角度为0
+        neckVerticalAngle = 0f
+        neckHorizontalAngle = 0f
+        showToast("脖子归位")
+        // 停止脖子电机并重置位置
+        mRobot.ctlMotor(1, 0, 0f, 30f) // 重置上下运动
+        mRobot.ctlMotor(2, 0, 0f, 30f) // 重置左右运动
     }
 }
