@@ -1,4 +1,4 @@
-package com.nuwarobotics.sdk.sample.tutorial
+package com.pinenuts.demo
 
 import android.Manifest
 import android.app.Activity
@@ -6,6 +6,8 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.media.AudioFormat
+import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Bundle
@@ -15,6 +17,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,7 +28,7 @@ import com.nuwarobotics.service.agent.RobotEventListener
 import com.nuwarobotics.service.agent.VoiceEventListener
 import com.nuwarobotics.service.agent.VoiceEventListener.ListenType
 import com.nuwarobotics.service.agent.VoiceEventListener.ResultType
-import com.nuwarobotics.sdk.sample.tutorial.databinding.ActivityMainBinding
+import com.pinenuts.demo.databinding.ActivityMainBinding
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -45,8 +48,10 @@ class MainActivity : Activity(), View.OnClickListener {
     private var audioFilePath: String? = null
     private lateinit var btnRecord: Button
     private lateinit var btnPlay: Button
+    private var audioChannelCount: Int = 1 // 存储音频输入设备的通道数量，默认为单声道
+    private lateinit var tvAudioInfo: TextView // 显示音频信息的 TextView
     companion object {
-        private const val TAG = "xxx_nuwa_sdk"
+        private const val TAG = "DannyDemo"
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -114,6 +119,12 @@ class MainActivity : Activity(), View.OnClickListener {
         neckVerticalAngle = 0f
         neckHorizontalAngle = 0f
         
+        // 初始化音频信息显示
+        tvAudioInfo = findViewById(R.id.tv_audio_info)
+        
+        // 获取并显示音频输入设备信息
+        getAudioInputChannelCount()
+        
         // 检查并请求权限
         if (!checkPermissions()) {
             requestPermissions()
@@ -153,11 +164,16 @@ class MainActivity : Activity(), View.OnClickListener {
         btnPlay.setOnClickListener {
             playRecording()
         }
+        
+        // 获取并显示音频输入设备的通道数量
+        getAudioInputChannelCount()
     }
 
     override fun onResume() {
         super.onResume()
         hideNavi()
+        // 在恢复时重新获取音频输入设备信息
+        getAudioInputChannelCount()
     }
 
     override fun onDestroy() {
@@ -189,6 +205,7 @@ class MainActivity : Activity(), View.OnClickListener {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
                 setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                 setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                setAudioChannels(audioChannelCount) // 设置录音通道数
                 setOutputFile(audioFilePath)
                 
                 try {
@@ -282,6 +299,81 @@ class MainActivity : Activity(), View.OnClickListener {
         mediaPlayer = null
         btnPlay.text = "播放"
         btnRecord.isEnabled = true
+    }
+    
+    // 获取音频输入设备的通道数量
+    private fun getAudioInputChannelCount() {
+        try {
+            // 尝试创建不同通道配置的 AudioRecord 实例来检测支持的通道数
+            val sampleRate = 44100 // 标准采样率
+            
+            // 先尝试立体声
+            var minBufferSize = AudioRecord.getMinBufferSize(
+                sampleRate,
+                AudioFormat.CHANNEL_IN_STEREO, // 尝试立体声
+                AudioFormat.ENCODING_PCM_16BIT
+            )
+            
+            if (minBufferSize != AudioRecord.ERROR_BAD_VALUE) {
+                // 设备支持立体声录音
+                audioChannelCount = 2
+                
+                // 创建临时 AudioRecord 实例以获取更多信息
+                val tempRecorder = AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    sampleRate,
+                    AudioFormat.CHANNEL_IN_STEREO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    minBufferSize
+                )
+                
+                if (tempRecorder.state == AudioRecord.STATE_INITIALIZED) {
+                    // 获取更多音频信息
+                    val channelInfo = "音频输入设备通道数：$audioChannelCount"
+                    val sampleRateInfo = "采样率：$sampleRate Hz"
+                    val bufferSizeInfo = "缓冲区大小：$minBufferSize bytes"
+                    
+                    // 更新 TextView 显示详细信息
+                    tvAudioInfo.text = "$channelInfo | $sampleRateInfo"
+                    
+                    Log.d(TAG, channelInfo)
+                    Log.d(TAG, sampleRateInfo)
+                    Log.d(TAG, bufferSizeInfo)
+                    
+                    // 释放临时资源
+                    tempRecorder.release()
+                }
+            } else {
+                // 尝试单声道
+                minBufferSize = AudioRecord.getMinBufferSize(
+                    sampleRate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT
+                )
+                
+                if (minBufferSize != AudioRecord.ERROR_BAD_VALUE) {
+                    // 设备支持单声道录音
+                    audioChannelCount = 1
+                    
+                    // 更新 TextView 显示通道数量
+                    tvAudioInfo.text = "音频输入设备通道数：$audioChannelCount | 采样率：$sampleRate Hz"
+                    
+                    Log.d(TAG, "音频输入设备通道数：$audioChannelCount")
+                    Log.d(TAG, "采样率：$sampleRate Hz")
+                    Log.d(TAG, "缓冲区大小：$minBufferSize bytes")
+                } else {
+                    // 无法确定通道数
+                    audioChannelCount = 0
+                    tvAudioInfo.text = "无法确定音频输入设备通道数"
+                    Log.e(TAG, "无法确定音频输入设备通道数")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "获取音频通道数量失败: ${e.message}")
+            tvAudioInfo.text = "音频输入设备通道数：获取失败"
+            // 默认设置为单声道，以确保录音功能正常工作
+            audioChannelCount = 1
+        }
     }
 
     private fun hideNavi() {

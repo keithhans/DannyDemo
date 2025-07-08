@@ -88,7 +88,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
             android:text="下" />
-    </RelativeLayout>
+</RelativeLayout>
     
     <!-- 右侧脖子控制区域 -->
     <RelativeLayout
@@ -153,5 +153,17 @@
             android:layout_marginTop="10dp"
             android:text="下" />
     </RelativeLayout>
+    
+    <!-- 底部显示音频输入设备信息 -->
+    <TextView
+        android:id="@+id/tv_audio_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#EEEEEE"
+        android:padding="8dp"
+        android:text="音频输入设备通道数：获取中..."
+        android:textColor="#333333"
+        android:gravity="center" />
 
 </RelativeLayout>
